@@ -1,0 +1,28 @@
+name: Build bug
+description: Report an Apple Silicon builder failure
+title: "[Build] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "Please run ./scripts/collect_diagnostics.sh and attach the generated diagnostics file. Do not include credentials or private keys."
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+    validations:
+      required: true
+  - type: input
+    id: chip
+    attributes:
+      label: Apple Silicon model
+      placeholder: M1, M2, M3, M4, ...
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Error output
+      description: Paste the final relevant build lines or attach diagnostics.
+    validations:
+      required: true

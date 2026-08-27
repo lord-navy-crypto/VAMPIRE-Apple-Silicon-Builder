@@ -1,0 +1,17 @@
+name: Builder Static Checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  static-checks:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shell syntax
+        run: |
+          zsh -n START.command
+          for f in scripts/*.sh; do zsh -n "$f"; done
+      - name: Repository self-check
+        run: ./scripts/repo_self_check.sh
