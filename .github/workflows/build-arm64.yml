@@ -38,11 +38,15 @@ jobs:
       - name: Verify installed arm64 executable
         run: |
           set -euo pipefail
-          BIN="$(find "$HOME/.local" -type f -name 'vampire*' -perm +111 2>/dev/null | head -n 1 || true)"
-          test -n "$BIN"
+          BIN="$HOME/.local/vampire-apple-silicon/bin/vampire-serial"
+          WRAPPER="$HOME/.local/vampire-apple-silicon/bin/vampire"
+          test -x "$BIN"
+          test -x "$WRAPPER"
           echo "Executable: $BIN"
           file "$BIN" | tee /tmp/vampire-architecture.txt
           file "$BIN" | grep -q arm64
+          test -f "$HOME/.local/vampire-apple-silicon/build-info/source.lock"
+          test -f "$HOME/.local/vampire-apple-silicon/build-info/smoke-output.txt"
 
       - name: Upload verification logs
         if: always()
@@ -52,5 +56,7 @@ jobs:
           path: |
             logs/*.log
             /tmp/vampire-architecture.txt
+            ~/.local/vampire-apple-silicon/build-info/source.lock
+            ~/.local/vampire-apple-silicon/build-info/smoke-output.txt
           if-no-files-found: warn
           retention-days: 7
