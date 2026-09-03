@@ -1,0 +1,56 @@
+name: VAMPIRE macOS arm64 Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-arm64:
+    runs-on: macos-14
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify Apple Silicon runner
+        run: |
+          test "$(uname -m)" = "arm64"
+          xcode-select -p
+          clang++ --version
+
+      - name: Shell syntax
+        run: |
+          zsh -n START.command
+          for f in scripts/*.sh; do zsh -n "$f"; done
+
+      - name: Build and smoke-test pinned VAMPIRE
+        run: |
+          chmod +x START.command scripts/*.sh
+          ./START.command
+
+      - name: Verify installed arm64 executable
+        run: |
+          set -euo pipefail
+          BIN="$(find "$HOME/.local" -type f -name 'vampire*' -perm +111 2>/dev/null | head -n 1 || true)"
+          test -n "$BIN"
+          echo "Executable: $BIN"
+          file "$BIN" | tee /tmp/vampire-architecture.txt
+          file "$BIN" | grep -q arm64
+
+      - name: Upload verification logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vampire-arm64-verification-${{ github.sha }}
+          path: |
+            logs/*.log
+            /tmp/vampire-architecture.txt
+          if-no-files-found: warn
+          retention-days: 7
